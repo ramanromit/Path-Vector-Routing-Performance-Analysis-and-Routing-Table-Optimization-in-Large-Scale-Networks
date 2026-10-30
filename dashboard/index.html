@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OBSIDIAN // BGP-4 Telemetry & Routing Table Optimization Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Minimal marked.js for research report rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <div class="app-root">
+
+    <!-- Top Navigation Bar -->
+    <header class="global-navbar" id="globalNavbar">
+      <div class="nav-brand">
+        <div class="brand-glyph" aria-hidden="true"></div>
+        <div class="brand-text">
+          <span class="brand-title">OBSIDIAN // BGP</span>
+          <span class="brand-sub">ROUTING TELEMETRY CONSOLE</span>
+        </div>
+        <div class="health-chip" id="healthChip" title="Real-time backend connection check">
+          <span class="status-dot dot-checking" id="statusDot"></span>
+          <span class="status-text" id="statusText">CONNECTING...</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs (7 Views) -->
+      <nav class="nav-tabs" aria-label="Primary Navigation">
+        <button class="nav-tab active" data-view="overview">Overview</button>
+        <button class="nav-tab" data-view="simulation">Live Simulation</button>
+        <button class="nav-tab" data-view="scaling">Scaling Metrics</button>
+        <button class="nav-tab" data-view="charts">Analytical Charts</button>
+        <button class="nav-tab" data-view="routes">Loc-RIB Table</button>
+        <button class="nav-tab" data-view="optimization">Optimization Lab</button>
+        <button class="nav-tab" data-view="report">Research Report</button>
+      </nav>
+
+      <!-- Global Actions -->
+      <div class="nav-actions">
+        <div class="global-scale-pill">
+          <span class="micro-label">ACTIVE SCALE</span>
+          <span class="scale-display" id="globalScaleDisplay">AS-25</span>
+        </div>
+        <button class="btn btn-primary btn-sm" id="quickOptimizeBtn" title="Run instant hybrid optimization on active topology">
+          <span>⚡ Optimize FIB</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Secondary Context Bar (Active Scale Selection & Status Banner) -->
+    <div class="context-bar">
+      <div class="scale-bar">
+        <span class="micro-label">SELECT SCALE:</span>
+        <div class="scale-btn-group" id="scaleSelectorGroup">
+          <button class="scale-btn" data-scale="10">AS-10</button>
+          <button class="scale-btn active" data-scale="25">AS-25</button>
+          <button class="scale-btn" data-scale="50">AS-50</button>
+          <button class="scale-btn" data-scale="100">AS-100</button>
+          <button class="scale-btn" data-scale="250">AS-250</button>
+          <button class="scale-btn" data-scale="500">AS-500</button>
+          <button class="scale-btn" data-scale="1000">AS-1000</button>
+        </div>
+      </div>
+
+      <div class="provenance-strip" id="provenanceStrip">
+        <span class="badge badge-benchmark" id="provenanceBadge">📊 RECORDED BENCHMARK</span>
+        <span class="strip-text" id="provenanceText">Displaying empirical measurements for N = 25 Autonomous Systems.</span>
+      </div>
+    </div>
+
+    <!-- Main Dynamic View Area -->
+    <main class="main-canvas" id="mainCanvas">
+
+      <!-- ===================================================================
+           VIEW 1: OVERVIEW DASHBOARD
+      ==================================================================== -->
+      <section class="view-panel active" id="view-overview">
+        <div class="view-header">
+          <div>
+            <div class="breadcrumb">SYSTEM ARCHITECTURE // EXPERIMENT BENCHMARK SUMMARY</div>
+            <h1 class="view-title">Path Vector Scalability &amp; Table Optimization</h1>
+          </div>
+          <div class="header-action-group">
+            <button class="btn btn-secondary btn-sm" id="overviewSimBtn">▶ Run Live Simulation</button>
+            <button class="btn btn-primary btn-sm" id="overviewOptBtn">Deploy Optimization</button>
+          </div>
+        </div>
+
+        <!-- 3-Column Structural Metric Cards -->
+        <div class="metrics-grid">
+
+          <!-- Card 1: Network & Topology Scale -->
+          <div class="metric-card">
+            <div class="card-head">
+              <span class="micro-label">1. NETWORK TOPOLOGY</span>
+              <span class="card-tag tag-neutral" id="ovTopologyTag">TRANSIT-STUB</span>
+            </div>
+            <div class="card-stat-lead">
+              <span class="stat-number tabular" id="ovNodes">25</span>
+              <span class="stat-unit">AS Nodes</span>
+            </div>
+            <p class="card-desc">Scale-free Barabási–Albert preferential attachment core with attached enterprise leaf stubs.</p>
+            <div class="kv-grid">
+              <div class="kv-item">
+                <span class="kv-k">PEERING LINKS</span>
+                <span class="kv-v tabular" id="ovEdges">39</span>
+              </div>
+              <div class="kv-item">
+                <span class="kv-k">ADVERTISED PREFIXES</span>
+                <span class="kv-v tabular" id="ovPrefixes">52</span>
+              </div>
+              <div class="kv-item">
+                <span class="kv-k">AVG AS-PATH LENGTH</span>
+                <span class="kv-v tabular" id="ovPathLen">2.32 hops</span>
+              </div>
+              <div class="kv-item">
+                <span class="kv-k">GRAPH DIAMETER</span>
+                <span class="kv-v tabular" id="ovDiameter">4 hops</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: BGP-4 Convergence & Churn -->
+          <div class="metric-card">
+            <div class="card-head">
+              <span class="micro-label">2. CONVERGENCE &amp; CHURN</span>
+              <span class="card-tag tag-primary" id="ovConvTag">STEADY-STATE</span>
+            </div>
+            <div class="card-stat-lead">
+              <span class="stat-number tabular" id="ovConvRounds">5</span>
+              <span class="stat-unit">Rounds to Converge</span>
+            </div>
+            <p class="card-desc">Discrete message-passing rounds until complete Loc-RIB route table stability across all routers.</p>
+            <div class="kv-grid">
+              <div class="kv-item">
+                <span class="kv-k">CONTROL MESSAGES</span>
+                <span class="kv-v tabular" id="ovTotalMsgs">3,198</span>
+              </div>
+              <div class="kv-item">
+                <span class="kv-k">EXECUTION LATENCY</span>
+                <span class="kv-v tabular" id="ovConvTime">0.023 s</span>
+              </div>
+              <div class="kv-item">
+                <span class="kv-k">FAILURE RECONVERGE</span>
+                <span class="kv-v tabular" id="ovFailRounds">2 rounds</span>
+              </div>
+              <div class="kv-item">
+                <span class="kv-k">FAILURE CHURN MSGS</span>
+                <span class="kv-v tabular" id="ovFailMsgs">734 msgs</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Optimization & Memory Savings -->
+          <div class="metric-card">
+            <div class="card-head">
+              <span class="micro-label">3. ROUTING TABLE COMPRESSION</span>
+              <span class="card-tag tag-success" id="ovOptTag">HYBRID ACTIVE</span>
+            </div>
+            <div class="card-stat-lead">
+              <span class="stat-number tabular text-positive" id="ovTableReduction">54.5%</span>
+              <span class="stat-unit">Table Reduction</span>
+            </div>
+            <p class="card-desc">CIDR summarization, stub default routing (0.0.0.0/0), and FIB AS-path pruning.</p>
+            <div class="kv-grid">
+              <div class="kv-item">
+                <span class="kv-k">RAW TABLE SIZE</span>
+                <span class="kv-v tabular" id="ovRawTable">52.0 entries</span>
+              </div>
+              <div class="kv-item">
+                <span class="kv-k">OPTIMIZED TABLE</span>
+                <span class="kv-v tabular" id="ovOptTable">23.6 entries</span>
+              </div>
+              <div class="kv-item">
+                <span class="kv-k">MEMORY SAVED</span>
+                <span class="kv-v tabular text-positive" id="ovMemSavings">79.6%</span>
+              </div>
+              <div class="kv-item">
+                <span class="kv-k">REACHABILITY</span>
+                <span class="kv-v tabular text-positive" id="ovReachability">100.0%</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- System Architecture & Academic Summary Block -->
+        <div class="content-panel mt-lg">
+          <div class="panel-header">
+            <span class="micro-label">PROBLEM STATEMENT &amp; METHODOLOGY</span>
+            <span class="badge badge-accent">RESEARCH SUMMARY</span>
+          </div>
+          <div class="panel-body leading-relaxed text-secondary">
+            <p>
+              In large-scale inter-domain networks, standard BGP-4 Path Vector routing suffers from two fundamental bottlenecks:
+              <strong>(1) Rapid routing table inflation</strong> ($O(N \times P)$ growth requiring substantial TCAM memory), and
+              <strong>(2) Reconvergence message storms</strong> following topological perturbations (path hunting).
+            </p>
+            <p class="mt-sm">
+              This simulation engine evaluates multi-scale topologies ($N = 10 \to 1000$ ASes) under deterministic discrete-event conditions.
+              It verifies that a combined <strong>Hybrid Optimization Suite</strong> (CIDR prefix aggregation, stub default route injection, and AS-path compression)
+              substantially cuts router memory footprint and table entries while preserving the fundamental <strong>100.0% end-to-end reachability invariant</strong> verified via Longest Prefix Match (LPM) packet forwarding.
+            </p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===================================================================
+           VIEW 2: LIVE SIMULATION WORKSPACE
+      ==================================================================== -->
+      <section class="view-panel" id="view-simulation">
+        <div class="view-header">
+          <div>
+            <div class="breadcrumb">DISCRETE-EVENT ENGINE // LIVE BGP TOPOLOGY SIMULATION</div>
+            <h1 class="view-title">Dynamic Topology &amp; Perturbation Workspace</h1>
+          </div>
+          <div class="header-action-group">
+            <button class="btn btn-primary btn-sm" id="simRunBtn">⚡ Run Convergence</button>
+            <button class="btn btn-danger btn-sm" id="simFailBtn">⚠ Simulate Link Failure</button>
+            <button class="btn btn-secondary btn-sm" id="simRestoreBtn" disabled>↻ Restore Link</button>
+          </div>
+        </div>
+
+        <div class="sim-split-layout">
+          <!-- Left: HTML5 Canvas Topology Graph -->
+          <div class="canvas-panel">
+            <div class="panel-header">
+              <div class="panel-header-title">
+                <span class="micro-label">AS PEERING TOPOLOGY</span>
+                <span class="badge" id="simScaleBadge">SCALE: AS-25</span>
+              </div>
+              <div class="canvas-ctrls">
+                <button class="btn-ghost-sm" id="simPausePulseBtn">⏸ Pause Pulse</button>
+                <button class="btn-ghost-sm" id="simSendPulseBtn">⚡ Pulse KeepAlive</button>
+                <button class="btn-ghost-sm" id="simResetLayoutBtn">↺ Reset Layout</button>
+              </div>
+            </div>
+
+            <div class="canvas-viewport" id="canvasViewport">
+              <canvas id="topologyCanvas" width="900" height="520"></canvas>
+              
+              <!-- Canvas Floating Overlay HUD -->
+              <div class="canvas-hud">
+                <span class="hud-pill"><span class="hud-dot"></span><span id="hudFps">ENGINE: 60 FPS</span></span>
+                <span class="hud-pill"><span class="hud-label">EDGES:</span> <span id="hudEdgeCount">39 Links</span></span>
+                <span class="hud-pill"><span class="hud-label">ACTIVE LINK STATE:</span> <span id="hudLinkState" class="text-positive">ALL OPERATIONAL</span></span>
+              </div>
+
+              <!-- Tooltip Popup -->
+              <div class="node-tooltip" id="nodeTooltip" style="display: none;">
+                <div class="tt-header" id="ttTitle">AS-1</div>
+                <div class="tt-row"><span class="tt-k">Classification:</span> <span class="tt-v text-positive" id="ttTier">Tier-1 Core</span></div>
+                <div class="tt-row"><span class="tt-k">Peers:</span> <span class="tt-v tabular" id="ttPeers">8 Links</span></div>
+                <div class="tt-row"><span class="tt-k">Originated:</span> <span class="tt-v tabular" id="ttPrefix">10.0.1.0/24</span></div>
+                <div class="tt-row"><span class="tt-k">Loc-RIB Size:</span> <span class="tt-v tabular" id="ttTableSize">52 Routes</span></div>
+                <div class="tt-hint">Click node to inspect forwarding table &amp; vector</div>
+              </div>
+            </div>
+
+            <!-- Legend Bar -->
+            <div class="canvas-legend">
+              <div class="legend-chip"><span class="dot-core"></span><span>Core Tier-1</span></div>
+              <div class="legend-chip"><span class="dot-transit"></span><span>Transit Tier-2</span></div>
+              <div class="legend-chip"><span class="dot-stub"></span><span>Leaf Stub</span></div>
+              <div class="legend-chip"><span class="dot-pulse"></span><span>Control UPDATE</span></div>
+              <div class="legend-chip"><span class="dot-failed"></span><span>Severed Edge</span></div>
+              <div class="legend-note">Interactive: Drag nodes to rearrange • Click node to inspect details</div>
+            </div>
+          </div>
+
+          <!-- Right: Inspector Sidebar & Live Event Stream -->
+          <div class="sim-sidebar">
+
+            <!-- Selected Node Inspector Card -->
+            <div class="content-panel">
+              <div class="panel-header">
+                <span class="micro-label">NODE TELEMETRY INSPECTOR</span>
+                <span class="badge badge-accent" id="inspectNodeBadge">AS-1</span>
+              </div>
+              <div class="panel-body">
+                <div class="kv-grid-compact">
+                  <div class="kv-item">
+                    <span class="kv-k">ROLE / TIER</span>
+                    <span class="kv-v text-positive" id="inspectTier">Tier-1 Core Hub</span>
+                  </div>
+                  <div class="kv-item">
+                    <span class="kv-k">ADJACENT PEERS</span>
+                    <span class="kv-v tabular" id="inspectPeers">8 Links</span>
+                  </div>
+                  <div class="kv-item">
+                    <span class="kv-k">PRIMARY PREFIX</span>
+                    <span class="kv-v tabular" id="inspectPrefix">10.0.1.0/24</span>
+                  </div>
+                  <div class="kv-item">
+                    <span class="kv-k">LOC-RIB SIZE</span>
+                    <span class="kv-v tabular" id="inspectTableSize">52 Entries</span>
+                  </div>
+                </div>
+
+                <div class="mt-sm">
+                  <span class="micro-label">ACTIVE FORWARDING VECTOR:</span>
+                  <div class="path-box" id="inspectPathVectorBox">
+                    <span class="path-badge">SRC: AS-1</span>
+                    <span class="path-arrow">→</span>
+                    <span class="path-badge">Self (Direct)</span>
+                  </div>
+                </div>
+
+                <button class="btn btn-secondary btn-block mt-sm" id="inspectJumpToRoutesBtn">
+                  Inspect in Loc-RIB Table →
+                </button>
+              </div>
+            </div>
+
+            <!-- Live Event Telemetry Stream -->
+            <div class="content-panel mt-md flex-1">
+              <div class="panel-header">
+                <div class="panel-header-title">
+                  <span class="terminal-prompt">$</span>
+                  <span class="micro-label">LIVE BGP TELEMETRY STREAM</span>
+                </div>
+                <button class="btn-ghost-sm" id="clearLogBtn">Clear</button>
+              </div>
+              <div class="event-stream" id="eventLogBody">
+                <div class="log-line log-system">[INIT] OBSIDIAN Telemetry Engine ready. Connected to FastAPI server.</div>
+                <div class="log-line log-info">[STATUS] Pre-warmed cache loaded for 7 scales ($N = 10 \to 1000$).</div>
+                <div class="log-line log-positive">[READY] Select an action or node above to inspect real-time discrete-event propagation.</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===================================================================
+           VIEW 3: SCALING METRICS BENCHMARK
+      ==================================================================== -->
+      <section class="view-panel" id="view-scaling">
+        <div class="view-header">
+          <div>
+            <div class="breadcrumb">EMPIRICAL DATASET // MULTI-SCALE SCALABILITY ANALYSIS</div>
+            <h1 class="view-title">Network Scale Comparison ($N = 10 \to 1000$ ASes)</h1>
+          </div>
+          <div class="header-action-group">
+            <button class="btn btn-secondary btn-sm" id="exportScalingCsvBtn">Export CSV</button>
+          </div>
+        </div>
+
+        <!-- Comparative Metrics Table -->
+        <div class="content-panel">
+          <div class="panel-header">
+            <span class="micro-label">RECORDED BENCHMARK METRICS ACROSS SCALES</span>
+            <span class="badge badge-accent">7 EMPIRICAL TIERS</span>
+          </div>
+          <div class="table-container">
+            <table class="data-table" id="scalingTable">
+              <thead>
+                <tr>
+                  <th>SCALE ($N$)</th>
+                  <th>LINKS</th>
+                  <th>PREFIXES</th>
+                  <th>CONV. ROUNDS</th>
+                  <th>CONV. TIME</th>
+                  <th>MESSAGES</th>
+                  <th>RAW TABLE</th>
+                  <th>MEMORY</th>
+                  <th>FAIL ROUNDS</th>
+                  <th>FAIL CHURN</th>
+                  <th>REACHABILITY</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="scalingTableBody">
+                <!-- Dynamically populated from /api/scales -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 4 Summary Comparative Ratio Cards (Current Scale vs N=1000) -->
+        <div class="grid-4 mt-lg">
+          <div class="summary-card">
+            <span class="micro-label">TABLE SIZE EXPLOSION</span>
+            <div class="card-stat-lead">
+              <span class="stat-number tabular" id="ratioTable">40.4×</span>
+              <span class="stat-unit">at N=1000</span>
+            </div>
+            <p class="card-desc">Table grows from 52 entries (N=25) to 2,100 entries (N=1000) in uncompressed BGP.</p>
+          </div>
+
+          <div class="summary-card">
+            <span class="micro-label">CONTROL CHURN FACTOR</span>
+            <div class="card-stat-lead">
+              <span class="stat-number tabular" id="ratioMessages">848×</span>
+              <span class="stat-unit">at N=1000</span>
+            </div>
+            <p class="card-desc">Failure messages escalate from 734 to 623,086 messages during transit reconvergence.</p>
+          </div>
+
+          <div class="summary-card">
+            <span class="micro-label">ROUTER MEMORY FOOTPRINT</span>
+            <div class="card-stat-lead">
+              <span class="stat-number tabular" id="ratioMemory">1,818×</span>
+              <span class="stat-unit">at N=1000</span>
+            </div>
+            <p class="card-desc">Total network router RAM jumps from 0.73 MB to 1,321 MB without optimization.</p>
+          </div>
+
+          <div class="summary-card">
+            <span class="micro-label">CONVERGENCE ROUNDS</span>
+            <div class="card-stat-lead">
+              <span class="stat-number tabular" id="ratioRounds">4 Rounds</span>
+              <span class="stat-unit">Max Diameter Bound</span>
+            </div>
+            <p class="card-desc">Reconvergence rounds remain tightly bounded by topological diameter ($O(D)$ ticks).</p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===================================================================
+           VIEW 4: ANALYTICAL CHARTS (300 DPI)
+      ==================================================================== -->
+      <section class="view-panel" id="view-charts">
+        <div class="view-header">
+          <div>
+            <div class="breadcrumb">RESEARCH VISUALIZATION // PUBLICATION-READY ANALYTICAL PLOTS</div>
+            <h1 class="view-title">300 DPI Scalability &amp; Optimization Figures</h1>
+          </div>
+        </div>
+
+        <div class="content-panel">
+          <div class="panel-header">
+            <div class="chart-tab-strip" id="chartTabStrip">
+              <button class="filter-chip active" data-chart="table-scaling">Table Size Scaling</button>
+              <button class="filter-chip" data-chart="convergence-scaling">Convergence Latency</button>
+              <button class="filter-chip" data-chart="message-overhead">Message Churn</button>
+              <button class="filter-chip" data-chart="memory-scaling">Memory Footprint</button>
+              <button class="filter-chip" data-chart="strategy-comparison">Strategy Reduction</button>
+            </div>
+          </div>
+
+          <div class="chart-viewport">
+            <img id="chartImageDisplay" src="/charts/routing_table_size_scaling.png" alt="Analytical Chart" class="chart-img">
+          </div>
+
+          <div class="panel-footer">
+            <span class="micro-label">ANALYSIS / TAKEAWAY:</span>
+            <p class="text-secondary mt-xs" id="chartCaptionText">
+              Shows linear/polynomial growth of raw BGP routing tables vs. compressed scale-resistant table size after hybrid optimization.
+            </p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===================================================================
+           VIEW 5: LOC-RIB TABLE INSPECTOR
+      ==================================================================== -->
+      <section class="view-panel" id="view-routes">
+        <div class="view-header">
+          <div>
+            <div class="breadcrumb">ROUTING INFORMATION BASE // FORWARDING TABLE INSPECTOR</div>
+            <h1 class="view-title">Loc-RIB Forwarding Table (AS-<span id="routeAsHeading">1</span>)</h1>
+          </div>
+          <div class="header-action-group">
+            <div class="as-selector-wrap">
+              <span class="micro-label">INSPECT AS:</span>
+              <input type="number" id="routeAsInput" class="input-dense" min="1" max="1000" value="1">
+              <button class="btn btn-secondary btn-sm" id="routeAsLoadBtn">Load</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Toolbar -->
+        <div class="toolbar-box">
+          <div class="toolbar-left">
+            <div class="search-wrap">
+              <span class="search-glyph">⌕</span>
+              <input type="text" id="routeSearchBox" class="input-search" placeholder="Search prefix or AS next-hop...">
+            </div>
+            <div class="filter-chip-group">
+              <button class="filter-chip active" data-filter="all">All Prefixes (<span id="routeTotalBadge">52</span>)</button>
+              <button class="filter-chip" data-filter="core">Core ASes</button>
+              <button class="filter-chip" data-filter="stubs">Leaf Stubs</button>
+              <button class="filter-chip" data-filter="aggregated">CIDR Supernets</button>
+            </div>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-secondary btn-sm" id="exportRoutesCsvBtn">Export Table CSV</button>
+          </div>
+        </div>
+
+        <!-- Routing Data Table -->
+        <div class="content-panel mt-sm">
+          <div class="table-container">
+            <table class="data-table" id="locRibTable">
+              <thead>
+                <tr>
+                  <th>DESTINATION PREFIX</th>
+                  <th>PREFIX TYPE</th>
+                  <th>NEXT-HOP</th>
+                  <th>AS-PATH VECTOR</th>
+                  <th>HOPS</th>
+                  <th>STATE</th>
+                  <th>TRACE</th>
+                </tr>
+              </thead>
+              <tbody id="locRibTableBody">
+                <!-- Dynamically populated from /api/routes -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Footer -->
+          <div class="table-pagination">
+            <span class="page-meta" id="routePageMeta">Showing 1 to 12 of 52 routes</span>
+            <div class="pagination-btns">
+              <button class="btn btn-secondary btn-sm" id="routePrevBtn" disabled>Previous</button>
+              <span class="page-current" id="routePageDisplay">Page 1 of 5</span>
+              <button class="btn btn-secondary btn-sm" id="routeNextBtn">Next</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===================================================================
+           VIEW 6: OPTIMIZATION LAB
+      ==================================================================== -->
+      <section class="view-panel" id="view-optimization">
+        <div class="view-header">
+          <div>
+            <div class="breadcrumb">ROUTING TABLE OPTIMIZATION // FORWARDING VERIFICATION LAB</div>
+            <h1 class="view-title">Routing Table Compression &amp; LPM Verification</h1>
+          </div>
+        </div>
+
+        <div class="opt-split-layout">
+          <!-- Left: Strategy Selector & Baseline vs Optimized Comparison -->
+          <div class="opt-main-col">
+            <div class="content-panel">
+              <div class="panel-header">
+                <span class="micro-label">SELECT OPTIMIZATION TECHNIQUE</span>
+                <span class="badge badge-accent">4 STRATEGIES AVAILABLE</span>
+              </div>
+              <div class="panel-body">
+                <div class="strategy-selector-grid">
+                  <button class="strategy-card" data-strategy="PREFIX_AGGREGATION">
+                    <div class="strat-title">CIDR Prefix Aggregation</div>
+                    <div class="strat-desc">Collapses adjacent contiguous /24 prefixes into supernets (/22, /23).</div>
+                  </button>
+                  <button class="strategy-card" data-strategy="DEFAULT_ROUTE">
+                    <div class="strat-title">Stub Default Route</div>
+                    <div class="strat-desc">Replaces full transit tables with 0.0.0.0/0 on single-homed leaf stubs.</div>
+                  </button>
+                  <button class="strategy-card" data-strategy="PATH_COMPRESSION">
+                    <div class="strat-title">AS-Path Compression</div>
+                    <div class="strat-desc">Prunes transit AS_PATH vectors inside forwarding entries for non-transit nodes.</div>
+                  </button>
+                  <button class="strategy-card active" data-strategy="HYBRID">
+                    <div class="strat-title">Combined Hybrid Optimization</div>
+                    <div class="strat-desc">Applies all three techniques simultaneously for maximum compression.</div>
+                  </button>
+                </div>
+
+                <div class="opt-action-strip mt-md">
+                  <button class="btn btn-primary" id="applySelectedOptBtn">
+                    ▶ Apply Selected Optimization
+                  </button>
+                  <button class="btn btn-secondary" id="revertOptBtn">
+                    ↺ Revert to Raw BGP (Unoptimized)
+                  </button>
+                  <span class="strip-status" id="optStatusNotice">Active: Hybrid Optimization Applied</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Before vs After Verification Comparison Table -->
+            <div class="content-panel mt-md">
+              <div class="panel-header">
+                <span class="micro-label">BASELINE VS. OPTIMIZED COMPARISON (SCALE: AS-<span id="optScaleDisplay">25</span>)</span>
+                <span class="badge badge-success" id="optInvariantBadge">100.0% REACHABILITY PRESERVED</span>
+              </div>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>METRIC</th>
+                      <th>RAW BGP BASELINE</th>
+                      <th>OPTIMIZED FIB</th>
+                      <th>IMPROVEMENT / GAIN</th>
+                      <th>INVARIANT STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody id="optComparisonTableBody">
+                    <tr>
+                      <td>Average Routing Table Size</td>
+                      <td class="tabular" id="cmpRawTable">52.0 routes</td>
+                      <td class="tabular" id="cmpOptTable">23.6 routes</td>
+                      <td class="tabular text-positive" id="cmpTableGain">-54.5% entries</td>
+                      <td><span class="badge badge-success">Pass</span></td>
+                    </tr>
+                    <tr>
+                      <td>Total Router Memory Footprint</td>
+                      <td class="tabular" id="cmpRawMem">0.73 MB</td>
+                      <td class="tabular" id="cmpOptMem">0.15 MB</td>
+                      <td class="tabular text-positive" id="cmpMemGain">-79.6% RAM</td>
+                      <td><span class="badge badge-success">Pass</span></td>
+                    </tr>
+                    <tr>
+                      <td>End-to-End Reachability Ratio</td>
+                      <td class="tabular" id="cmpRawReach">100.0%</td>
+                      <td class="tabular" id="cmpOptReach">100.0%</td>
+                      <td class="tabular text-positive">Zero Packet Drop</td>
+                      <td><span class="badge badge-success">100% Invariant</span></td>
+                    </tr>
+                    <tr>
+                      <td>Forwarding Algorithm</td>
+                      <td>Exact Prefix Match</td>
+                      <td>Longest Prefix Match (LPM)</td>
+                      <td>Hierarchical Subnetting</td>
+                      <td><span class="badge badge-accent">RFC 1519 Valid</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Strategy Theory & LPM Packet Tracer -->
+          <div class="opt-side-col">
+            <!-- Theory & Worked Examples -->
+            <div class="content-panel">
+              <div class="panel-header">
+                <span class="micro-label">OPTIMIZATION MECHANISM</span>
+              </div>
+              <div class="panel-body text-secondary leading-relaxed" id="optTheoryContent">
+                <h4 class="text-primary font-semibold">How Hybrid Optimization Operates:</h4>
+                <p class="mt-xs">
+                  <strong>1. Stub Default Injection:</strong> Single-homed enterprise ASes only have one exit gateway. Replacing the entire global forwarding table with <code>0.0.0.0/0</code> cuts table size to 1 entry without dropping packets.
+                </p>
+                <p class="mt-xs">
+                  <strong>2. CIDR Prefix Summarization:</strong> Contiguous /24 subnets (e.g. <code>10.0.1.0/24</code> and <code>10.0.2.0/24</code>) originating from the same upstream provider are combined into supernets (<code>10.0.0.0/22</code>).
+                </p>
+                <p class="mt-xs">
+                  <strong>3. AS-Path Compression:</strong> Non-transit edge routers only require the next-hop IP, discarding the extended transitive AS_PATH in hardware FIB storage.
+                </p>
+              </div>
+            </div>
+
+            <!-- Real Hop-by-Hop LPM Packet Forwarding Tracer -->
+            <div class="content-panel mt-md">
+              <div class="panel-header">
+                <span class="micro-label">LONGEST PREFIX MATCH (LPM) PACKET TRACER</span>
+              </div>
+              <div class="panel-body">
+                <p class="text-secondary text-sm">
+                  Test that packets reach their destination under optimized tables via true hop-by-hop Longest Prefix Match (LPM).
+                </p>
+                
+                <div class="trace-form mt-sm">
+                  <div class="form-row">
+                    <label class="micro-label">SOURCE AS:</label>
+                    <select id="traceSrcAs" class="input-dense">
+                      <option value="1">AS-1 (Core Hub)</option>
+                      <option value="2">AS-2</option>
+                      <option value="5">AS-5</option>
+                      <option value="10">AS-10</option>
+                    </select>
+                  </div>
+                  <div class="form-row mt-xs">
+                    <label class="micro-label">DESTINATION PREFIX:</label>
+                    <select id="traceDestPrefix" class="input-dense">
+                      <option value="10.0.1.0/24">10.0.1.0/24</option>
+                    </select>
+                  </div>
+                  <button class="btn btn-primary btn-block mt-sm" id="traceRunBtn">
+                    ▶ Simulate Packet Forwarding (LPM)
+                  </button>
+                </div>
+
+                <!-- Trace Result Stepper -->
+                <div class="trace-result-box mt-sm" id="traceResultBox">
+                  <span class="micro-label">FORWARDING HOPS:</span>
+                  <div class="trace-hops-list" id="traceHopsList">
+                    <div class="trace-empty-hint">Select source and destination above and click Trace.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===================================================================
+           VIEW 7: RESEARCH REPORT
+      ==================================================================== -->
+      <section class="view-panel" id="view-report">
+        <div class="view-header">
+          <div>
+            <div class="breadcrumb">RESEARCH MANUSCRIPT // COMPREHENSIVE EXPERIMENT REPORT</div>
+            <h1 class="view-title">Empirical Research Report (`docs/final_report.md`)</h1>
+          </div>
+          <div class="header-action-group">
+            <button class="btn btn-secondary btn-sm" id="downloadReportBtn">↓ Download Markdown</button>
+          </div>
+        </div>
+
+        <div class="content-panel">
+          <div class="report-markdown-container" id="reportMarkdownContainer">
+            <div class="loading-spinner">Loading research report from backend...</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
